@@ -1,0 +1,76 @@
+---
+title: "MyFinalProject"
+author: "Arun"
+date: "February 15, 2016"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(caret)
+library(randomForest)
+set.seed(12345)
+```
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+#Load Data
+myTraining <- read.csv("D:\\ML\\PracticalML\\w4\\pml-training.csv", na.strings=c("NA","#DIV/0!",""))
+testing <- read.csv("D:\\ML\\PracticalML\\w4\\pml-testing.csv", na.strings=c("NA","#DIV/0!",""))
+
+
+#Clean data
+#1. clean near zero variables
+myDataNZV <- nearZeroVar(myTraining, saveMetrics=TRUE)
+myTraining <- myTraining[, !myDataNZV$nzv]
+dim(myTraining)
+#2. Remove variables with more than 80% of NAs
+na_var <- sapply(colnames(myTraining),
+                 function(x){
+                   if(sum(is.na(myTraining[,x]))> 0.8 * nrow(myTraining))
+                   {
+                     return (T)
+                   }
+                   else
+                   {
+                     return (F)
+                   }
+                 })
+
+myTraining <- myTraining[,!na_var]
+#To check the new number of observations
+dim(myTraining)
+# Calculate correlations
+cor <- abs(sapply(colnames(myTraining[, -ncol(myTraining)]), function(x) cor(as.numeric(myTraining[, x]), as.numeric(myTraining$classe), method = "spearman")))
+
+
+#Plot
+summary(cor)
+plot(myTraining[, names(which.max(cor))], myTraining[, names(which.max(cor[-which.max(cor)]))], col = myTraining$classe, pch = 19, cex = 0.1, xlab = names(which.max(cor)), ylab = names(which.max(cor[-which.max(cor)])))
+rfFit <- train(classe ~ ., method = "rf", data = myTraining, importance = T, trControl = trainControl(method = "cv", number = 10))
+
+imp <- varImp(rfFit)$importance
+imp$max <- apply(imp, 1, max)
+imp <- imp[order(imp$max, decreasing = T), ]
+
+
+# final model
+rfFit$finalModel
+# prediction
+(prediction <- as.character(predict(rfFit, testing)))
+
+
+# write prediction files
+pml_write_files = function(x){
+  n = length(x)
+  for(i in 1:n){
+    filename = paste0("./prediction/problem_id_", i, ".txt")
+    write.table(x[i], file = filename, quote = FALSE, row.names = FALSE, col.names = FALSE)
+  }
+}
+pml_write_files(prediction)
+```
