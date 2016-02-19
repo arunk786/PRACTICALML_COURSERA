@@ -16,7 +16,6 @@ library(randomForest)
 set.seed(12345)
 ```
 
-You can also embed plots, for example:
 
 ```{r, echo=FALSE}
 #Load Data
