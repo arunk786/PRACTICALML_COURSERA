@@ -10,6 +10,7 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r}
+#For this assignment I analyzed the provided data to determine what activity an individual perform. To do this I made use of caret and randomForest, this allowed me to generate correct answers for each of the 20 test data cases provided in this assignment. I made use of a seed value for consistent results.
 library(caret)
 library(randomForest)
 set.seed(12345)
@@ -19,6 +20,7 @@ You can also embed plots, for example:
 
 ```{r, echo=FALSE}
 #Load Data
+#First, I loaded the data both from the provided training and test data provided by COURSERA. Some values contained a "#DIV/0!" that I replaced with an NA value
 myTraining <- read.csv("D:\\ML\\PracticalML\\w4\\pml-training.csv", na.strings=c("NA","#DIV/0!",""))
 testing <- read.csv("D:\\ML\\PracticalML\\w4\\pml-testing.csv", na.strings=c("NA","#DIV/0!",""))
 
@@ -51,6 +53,9 @@ cor <- abs(sapply(colnames(myTraining[, -ncol(myTraining)]), function(x) cor(as.
 #Plot
 summary(cor)
 plot(myTraining[, names(which.max(cor))], myTraining[, names(which.max(cor[-which.max(cor)]))], col = myTraining$classe, pch = 19, cex = 0.1, xlab = names(which.max(cor)), ylab = names(which.max(cor[-which.max(cor)])))
+
+# A random forest model is applied on the data with a cross validation of 10
+# This model building using random forest was very slow
 rfFit <- train(classe ~ ., method = "rf", data = myTraining, importance = T, trControl = trainControl(method = "cv", number = 10))
 
 imp <- varImp(rfFit)$importance
@@ -63,8 +68,9 @@ rfFit$finalModel
 # prediction
 (prediction <- as.character(predict(rfFit, testing)))
 
-
+# Conclusions and Test Data Submit
 # write prediction files
+#Prepare the submission. (using COURSERA provided code)
 pml_write_files = function(x){
   n = length(x)
   for(i in 1:n){
