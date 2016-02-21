@@ -1,7 +1,7 @@
 ---
 title: "MyFinalProject"
 author: "Arun"
-date: "February 15, 2016"
+date: "February 21, 2016"
 output: html_document
 ---
 
@@ -66,6 +66,8 @@ imp <- imp[order(imp$max, decreasing = T), ]
 rfFit$finalModel
 # prediction
 (prediction <- as.character(predict(rfFit, testing)))
+
+#From the results obtained we can estimate the out of sample error (OSE) as: OSE = 1 - Accuracy = 1 - 0.98 = 0.02 or 2%
 
 # Conclusions and Test Data Submit
 # write prediction files
